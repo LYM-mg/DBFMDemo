@@ -1,0 +1,6 @@
+framework module Milk {
+  umbrella header "Milk-umbrella.h"
+
+  export *
+  module * { export * }
+}

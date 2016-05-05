@@ -1,0 +1,6 @@
+framework module SwiftyJSONMilk {
+  umbrella header "SwiftyJSONMilk-umbrella.h"
+
+  export *
+  module * { export * }
+}
