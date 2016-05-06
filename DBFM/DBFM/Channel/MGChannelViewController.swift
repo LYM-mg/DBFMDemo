@@ -8,12 +8,14 @@
 
 import UIKit
 
+// MARK:- <MGChannelViewControllerDelegate>
 protocol MGChannelViewControllerDelegate: NSObjectProtocol{
     func onChangeChannelForSelectRow(channel_id_str: String)
 }
 
-class MGChannelViewController: UIViewController {
 
+
+class MGChannelViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     var channelData = []
@@ -55,5 +57,18 @@ extension MGChannelViewController: UITableViewDataSource,UITableViewDelegate{
         }
         
         dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    /**
+    *   添加cell滚动的动画
+    */
+    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        // 防止重复添加动画
+        cell.layer.removeAnimationForKey("music");
+        let keyframeAnimation = CAKeyframeAnimation(keyPath: "transform.rotation.y")
+        keyframeAnimation.values = [(-2),(-1),(1),(2)];
+        keyframeAnimation.duration = 0.3
+        
+        cell.layer.addAnimation(keyframeAnimation, forKey: "music")
     }
 }

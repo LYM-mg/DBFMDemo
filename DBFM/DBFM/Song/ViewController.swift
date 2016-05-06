@@ -52,7 +52,7 @@ url = "http://mr7.doubanio.com/828e1d2f80b00df70bda1a1a7083e4b7/0/fm/song/p13933
 */
 
 import UIKit
-import AVFoundation
+import MediaPlayer
 
 class ViewController: UIViewController{
     // MARK:- storyboard拖出来的属性
@@ -71,7 +71,7 @@ class ViewController: UIViewController{
     /** 播放顺序按钮 */
     @IBOutlet weak var orderBtn: MGOrderButton!
     /** 播放暂停按钮 */
-    @IBOutlet weak var playORpauseBtn: UIButton!
+    @IBOutlet weak var playORpauseBtn: MGPlayAndPauseButton!
     /** 负责展示电台歌曲的View */
     @IBOutlet weak var tableView: UITableView!
     
@@ -81,13 +81,7 @@ class ViewController: UIViewController{
     /** 频道数组 */
     var channelData = []
     /** 负责播放音效的播放器 */
-    var player: AVPlayer = {
-        let playerItem = AVPlayerItem(URL: NSURL(string: "http://mr7.doubanio.com/325fc1313dcffb256a2104c57f6619da/0/fm/song/p727015_128k.mp4")!)
-        let player = AVPlayer(playerItem: playerItem)
-        return player
-    }()
-//    var player: AVAudioPlayer = AVAudioPlayer()
-    
+    var audioPlayer: MPMoviePlayerController = MPMoviePlayerController()
     /** 当前在播放第几首 */
     var currentSongIndex:Int = 0
     /** 是否自动播放到下一首 */
@@ -100,8 +94,6 @@ class ViewController: UIViewController{
     // MARK:- 控制器生命周期
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.tableView.backgroundColor = UIColor.clearColor()
        
         rotateImageView.startRotation()
         
@@ -114,7 +106,7 @@ class ViewController: UIViewController{
         tableView.delegate = self
         tableView.dataSource = self
         tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
-//        tableView.tableFooterView = UIView()
+        self.tableView.backgroundColor = UIColor.clearColor()
         
         httpControl.delegate = self
         // 获取频道数据
@@ -122,8 +114,7 @@ class ViewController: UIViewController{
         httpControl.onSearch("http://douban.fm/j/mine/playlist?type=n&channel=0&from=mainsite")
         
         //播放结束通知
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "songPlayFinish", name: AVPlayerItemTimeJumpedNotification , object: player)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "songPlayFinish", name: AVPlayerItemDidPlayToEndTimeNotification , object: player)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "songPlayFinish", name: MPMoviePlayerPlaybackDidFinishNotification, object: audioPlayer)
     }
     
     /** 人为结束的三种情况
@@ -131,7 +122,9 @@ class ViewController: UIViewController{
     */
     // 歌曲播放完毕的通知
     func songPlayFinish() {
+        print(isAutoFinish)
         if isAutoFinish { // 自动播放至下一首
+            isAutoFinish = false
             switch(orderBtn.orderIndex){
                 case 1: //顺序播放
                     currentSongIndex++
@@ -150,7 +143,27 @@ class ViewController: UIViewController{
             }
         }else{ // 人为使播放结束
             isAutoFinish = true
+            switch(orderBtn.orderIndex){
+            case 1: //顺序播放
+                currentSongIndex++
+                if currentSongIndex >= songData.count {
+                    currentSongIndex = 0
+                }
+                onSelectRowIndex(currentSongIndex)
+            case 2: //随机播放
+                currentSongIndex = random() % songData.count
+                onSelectRowIndex(currentSongIndex)
+            case 3: //单曲循环
+                onSelectRowIndex(currentSongIndex-1)
+            default:
+                "default"
+                
+            }
         }
+        rotateImageView.stopRotation()
+        rotateImageView.startRotation()
+        playORpauseBtn.setBackgroundImage(UIImage(named: "player_btn_pause_normal"), forState: .Normal)
+        playORpauseBtn.setBackgroundImage(UIImage(named: "player_btn_pause_highlight"), forState: .Highlighted)
     }
     deinit{
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -189,10 +202,10 @@ class ViewController: UIViewController{
         btn.selected = !btn.selected
         // 设置按钮背景图片
         if btn.selected {
-            player.pause()
+            audioPlayer.pause()
             rotateImageView.stopRotation()
         }else {
-            player.play()
+            audioPlayer.play()
             rotateImageView.startRotation()
         }
     }
@@ -235,6 +248,9 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
          onSelectRowIndex(indexPath.row)
     }
     
+    func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
+        
+    }
     
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         return CGFloat(50)
@@ -245,7 +261,7 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
         //设置cell的显示动画为3d缩放，xy方向的缩放动画，初始值为0.1 结束值为1
         cell.layer.transform = CATransform3DMakeScale(0.1, 0.1, 1)
         UIView.animateWithDuration(0.2) { () -> Void in
-            cell.layer.transform = CATransform3DMakeScale(0.1, 0.1, 1)
+            cell.layer.transform = CATransform3DMakeScale(1, 1, 1)
         }
     }
     
@@ -284,21 +300,15 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
     
     // 播放电台音乐
     private func onSetPlayAudio(url: String){
-        guard let url = NSURL(string: url) else{
-            return
-        }
-        let playerItem = AVPlayerItem(URL: url)
-        player.replaceCurrentItemWithPlayerItem(playerItem)
-//        player.setValue(url, forKey: "url")
-//        player.currentItem
-
-//        try! AVAudioPlayer(contentsOfURL: url)
-        
-        player.play()
+        self.audioPlayer.stop()
+        self.audioPlayer.contentURL = NSURL(string: url)
+//        audioPlayer = MPMoviePlayerController(contentURL: url)
+        audioPlayer.play()
         
         // 清除定时器
         timer?.invalidate()
         playTimeLabel.text = "00:00"
+        playTimeLabel.textColor = UIColor.whiteColor()
         
         timer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: "updateTime", userInfo: nil, repeats: true)
         
@@ -307,39 +317,33 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
     
     // 时间的处理
     @objc private func updateTime() {
-        let currentTime = player.currentItem?.currentTime
-        let totalTime = (player.currentItem?.duration)
-        print("currentTime=\(currentTime!)")
-        print("totalTime=\(totalTime)")
-        /**
-        currentTime=(Function)
-        totalTime=Optional(C.CMTime(value: 25541485, timescale: 90000, flags: C.CMTimeFlags(rawValue: 1), epoch: 0))
-        */
-//        var timeText: String = ""
-//        if currentTime > 0.0 {
-//            let totalTime = (player.currentItem?.duration)
-//            let factor: CGFloat = CGFloat(currentTime/totalTime)
-//            progressWidth.constant = view.frame.width * factor
-//            
-//            let all: Int = Int(currentTime!)
-//            
-//            let min = all/60
-//            let sec = all%60
-//            
-//            if min<10 {
-//                timeText = "0\(min):"
-//            }else {
-//                timeText = "\(min):"
-//            }
-//            
-//            if sec<10 {
-//                timeText += "0\(sec)"
-//            }else{
-//                timeText += "\(sec)"
-//            }
-//        }
-//        
-//        playTimeLabel.text = timeText
+        let currentTime = audioPlayer.currentPlaybackTime
+        
+        var timeText: String = ""
+        if currentTime>0.0 {
+            let totalTime = audioPlayer.duration
+            let factor: CGFloat = CGFloat(currentTime/totalTime)
+            progressWidth.constant = view.frame.width * factor
+            
+            let all: Int = Int(currentTime)
+            
+            let min = all/60
+            let sec = all%60
+            
+            if min<10 {
+                timeText = "0\(min):"
+            }else {
+                timeText = "\(min):"
+            }
+            
+            if sec<10 {
+                timeText += "0\(sec)"
+            }else{
+                timeText += "\(sec)"
+            }
+        }
+        
+        playTimeLabel.text = timeText
     }
 }
 
