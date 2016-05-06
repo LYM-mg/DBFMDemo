@@ -57,7 +57,6 @@
 		3AFF90EC1CD982BF000398BE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFF90EA1CD982BF000398BE /* ViewController.swift */; settings = {ASSET_TAGS = (); }; };
 		3AFF90F71CDA732F000398BE /* MGPlayAndPauseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFF90F61CDA732E000398BE /* MGPlayAndPauseButton.swift */; settings = {ASSET_TAGS = (); }; };
 		3AFF90F91CDA7D6B000398BE /* MGOrderButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFF90F81CDA7D6B000398BE /* MGOrderButton.swift */; settings = {ASSET_TAGS = (); }; };
-		5CCD4614AE113541201471B5 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E73ECC18DD367484B9C8BC7B /* Pods.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -162,7 +161,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5CCD4614AE113541201471B5 /* Pods.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -664,6 +662,7 @@
 				INFOPLIST_FILE = DBFM/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ming.DBFM;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = DBFM/bridge.h;
@@ -678,6 +677,7 @@
 				INFOPLIST_FILE = DBFM/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ming.DBFM;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = DBFM/bridge.h;

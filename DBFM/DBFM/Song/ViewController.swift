@@ -223,15 +223,16 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier)
 
-        cell?.backgroundColor = UIColor.clearColor()
+//        cell?.backgroundColor = UIColor.clearColor()
         
         let rowData = self.songData[indexPath.row] as! [String : AnyObject]
         if let title = rowData["title"] as? String {
             cell?.textLabel?.text = title
         }
         
+        // warming: 设置无效是怎么回事？
         if let artist = rowData["artist"] as? String{
-            cell?.detailTextLabel?.text = artist
+            cell?.detailTextLabel?.text = "\(artist)"
         }
         
         if let urlStr = rowData["picture"] as? String {
@@ -253,7 +254,7 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return CGFloat(50)
+        return CGFloat(70)
     }
     
     //设置cell的显示动画
@@ -302,7 +303,6 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
     private func onSetPlayAudio(url: String){
         self.audioPlayer.stop()
         self.audioPlayer.contentURL = NSURL(string: url)
-//        audioPlayer = MPMoviePlayerController(contentURL: url)
         audioPlayer.play()
         
         // 清除定时器
