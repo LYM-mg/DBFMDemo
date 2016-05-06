@@ -5,3 +5,4 @@
 
 http://upload-images.jianshu.io/upload_images/1429890-c7971b3826546b73.gif?imageMogr2/auto-orient/strip
 
+![image](http://upload-images.jianshu.io/upload_images/1429890-c7971b3826546b73.gif?imageMogr2/auto-orient/strip "豆瓣电台介绍图")
